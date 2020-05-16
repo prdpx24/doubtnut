@@ -17,7 +17,7 @@ MATHEMATICS = {
     ],
     "calculus": [
         "diffrentiation", "integral", "derivative", "minima", 
-        "area under the", "maxima", "newton", "leibniz"
+        "area under the", "maxima", "newton", "leibniz", "limit"
     ]
 }
 

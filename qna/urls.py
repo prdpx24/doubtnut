@@ -7,9 +7,12 @@ app_name = "qna"
 
 router = routers.SimpleRouter()
 router.register(
-    r"user-asked-question",
+    r"user-asked-questions",
     views.UserAskedQuestionViewSet,
-    basename="user_asked_question",
+    basename="user_asked_questions",
+)
+router.register(
+    r"catalog-questions", views.CatalogQuestionViewSet, basename="catalog_questions"
 )
 
 urlpatterns = [

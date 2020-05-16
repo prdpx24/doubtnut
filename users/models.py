@@ -29,7 +29,7 @@ class User(AbstractUser):
     @property
     def full_name(self):
         if self.first_name:
-            return self.first_name + " " + self.last_name if self.last_name else ""
+            return self.first_name + (" " + self.last_name if self.last_name else "")
         else:
             # fallback to username if first_name is null
             return self.username
