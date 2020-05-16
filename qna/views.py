@@ -3,13 +3,17 @@ from django.shortcuts import render
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 
-from .models import UserAskedQuestion, Question
+from .models import UserAskedQuestion, Question, Tag
 from .serializers import (
     QuestionBaseSerializer,
     UserAskedQuestionBaseSerializer,
     UserAskedQuestionDetailSerializer,
 )
-from .utils import extract_text_from_image, bisect_extracted_question
+from .utils import (
+    extract_text_from_image,
+    bisect_extracted_question,
+    get_possible_tags_from_text,
+)
 
 
 class UserAskedQuestionViewSet(viewsets.ModelViewSet):
@@ -26,12 +30,17 @@ class UserAskedQuestionViewSet(viewsets.ModelViewSet):
             extracted_text = "Generic Question Title\nGeneric Description"
 
         # create question instance
+        possible_tags = get_possible_tags_from_text(extracted_text)
+
         title, description = bisect_extracted_question(extracted_text)
 
         question_instance = Question(
             title=title, description=description, created_by=request.user
         )
         question_instance.save()
+        for tag_key in possible_tags:
+            tag_instance, created = Tag.objects.get_or_create(name=tag_key)
+            question_instance.tags.add(tag_instance)
 
         # set pointer back to start of file
         uploaded_image.seek(0)

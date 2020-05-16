@@ -8,7 +8,7 @@ class User(AbstractUser):
     """
     Schema for users table
     first_name, last_name, email, username & password are 
-    already decalred in BaseClass `AbstractUser` 
+    already declared in BaseClass `AbstractUser` 
     """
 
     TYPE_CHOICES = ((UserType.STAFF, "Staff"), (UserType.STUDENT, "Student"))

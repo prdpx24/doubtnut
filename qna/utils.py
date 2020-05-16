@@ -1,11 +1,15 @@
 import os
 import string
 import random
+import re
 from urllib.request import urlopen
 
 
 import pytesseract
 from PIL import Image, ImageEnhance, ImageFilter
+
+
+from .constants import TAG_ENGINE_KEYWORDS
 
 
 def generate_random_string(length=8):
@@ -63,3 +67,19 @@ def bisect_extracted_question(text):
         title = lines[0]
         description = "\n".join(lines[1:])
         return title, description
+
+
+def get_possible_tags_from_text(text):
+    """
+    dumb tag detector engine
+    """
+    tags = []
+
+    for meta_tag in TAG_ENGINE_KEYWORDS.keys():
+        possible_tags = TAG_ENGINE_KEYWORDS[meta_tag]
+        for tag_key in possible_tags:
+            for word in possible_tags[tag_key]:
+                if word in text:
+                    tags.append(tag_key)
+                    break
+    return list(set(tags))
