@@ -22,6 +22,7 @@ from .utils import (
     bisect_extracted_question,
     get_possible_tags_from_text,
 )
+from .tasks import trigger_async_task_on_user_inactivity
 
 
 class UserAskedQuestionViewSet(viewsets.ModelViewSet):
@@ -30,6 +31,11 @@ class UserAskedQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = UserAskedQuestionBaseSerializer
 
     def create(self, request, *args, **kwargs):
+        """
+        url: /qna/api/user-asked-questions/
+        method: POST
+        data: {"image":<image>}
+        """
         # in-memory image file
         uploaded_image = request.data.get("image")
         extracted_text = extract_text_from_image(uploaded_image)
@@ -69,6 +75,10 @@ class CatalogQuestionViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def list(self, request):
+        """
+        method: GET
+        url: /qna/api/catalog-questions/?asked_question_id=<user_asked_question_pk>
+        """
         asked_question_id = request.query_params.get("asked_question_id")
         if not asked_question_id:
             return Response(
@@ -202,9 +212,8 @@ class CatalogQuestionViewSet(viewsets.ModelViewSet):
 
         trigger_email_on_inactivity = request.data.get("trigger_email_on_inactivity")
         if trigger_email_on_inactivity:
-            # TODO
             # trigger async celery task
-            pass
+            trigger_async_task_on_user_inactivity(request.user, asked_question)
 
         return Response(
             currently_viewed_catalog_question_data, status=status.HTTP_200_OK
@@ -216,6 +225,24 @@ class CatalogQuestionViewSet(viewsets.ModelViewSet):
         permission_classes=[permissions.IsAuthenticated,],
     )
     def send_mail_on_user_inactivity(self, request):
+        """
+        {
+            "current_catalog_question_id":<catalog_question_id>,
+            "asked_question_id":<asked_question_id>,
+        }
+        """
         # TODO
-        pass
-        return Response({}, status=status.HTTP_501_NOT_IMPLEMENTED)
+        try:
+            asked_question_id = request.data.get("asked_question_id")
+            user_asked_question = UserAskedQuestion.objects.get(id=asked_question_id)
+            trigger_async_task_on_user_inactivity(request.user, user_asked_question)
+            return Response(
+                {"msg": "Catalog question set is queued for user"},
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            print("** exception in executing async task**")
+            print(e)
+        return Response(
+            {"msg": "Failed to execute async task"}, status=status.HTTP_200_OK,
+        )

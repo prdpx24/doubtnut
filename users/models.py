@@ -4,6 +4,10 @@ from django.contrib.auth.models import AbstractUser
 from .constants import UserType
 
 
+def get_email_attachment_location(instance, filename):
+    return "notifications/{}/{}".format(instance.user.id, filename)
+
+
 class User(AbstractUser):
     """
     Schema for users table
@@ -36,3 +40,13 @@ class User(AbstractUser):
 
     def __str__(self):
         return "{} - {}".format(self.full_name, self.email)
+
+
+class UserNotificationHistory(models.Model):
+    user = models.ForeignKey(User, blank=False, null=False, on_delete=models.CASCADE)
+    email_subject = models.CharField(max_length=500, blank=True, null=True)
+    email_attachment = models.FileField(upload_to=get_email_attachment_location)
+    triggered_at = models.DateTimeField(blank=True, null=True)
+
+    def __str__(self):
+        return "{} - {} - {}".format(self.user, self.email_subject, self.triggered_at)

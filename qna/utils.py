@@ -5,6 +5,7 @@ import re
 from urllib.request import urlopen
 
 
+from fpdf import FPDF
 import pytesseract
 from PIL import Image, ImageEnhance, ImageFilter
 
@@ -83,3 +84,39 @@ def get_possible_tags_from_text(text):
                     tags.append(tag_key)
                     break
     return list(set(tags))
+
+
+def generate_pdf_document_from_catalog_questions(catalog_questions):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=15)
+    pdf.cell(200, 10, txt="Doubtnut", ln=2, align="C")
+    for idx, catalog_question in enumerate(catalog_questions):
+        title = catalog_question.question.title
+        if title:
+            pdf.cell(200, 10, txt=str(idx + 1) + "." + title, ln=idx + 1, align="L")
+        description = catalog_question.question.description
+        if description:
+            pdf.set_text_color(0, 0, 255)
+            pdf.cell(
+                200,
+                10,
+                txt=description,
+                ln=idx + 1,
+                align="L",
+                link=catalog_question.video_url,
+            )
+            pdf.set_text_color(0, 0, 0)
+        # video_url = catalog_question.video_url
+        # if video_url:
+        #     # link = pdf.add_link(video_url)
+        #     pdf.cell(
+        #         200, 10, txt="Video", link=video_url, ln=idx + 1, align="L",
+        #     )
+        pdf.cell(200, 10, txt="\n", ln=1, align="L")
+
+    output_filepath = (
+        "/tmp/" + "generated_catalog_" + generate_random_string(length=10) + ".pdf"
+    )
+    pdf.output(output_filepath)
+    return output_filepath

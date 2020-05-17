@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "celery",
+    "kombu",
 ] + DOUBTNUT_APPS
 
 
@@ -142,3 +144,16 @@ JWT_AUTH = {
     "JWT_RESPONSE_PAYLOAD_HANDLER": "users.utils.custom_jwt_response_payload_handler",
     "JWT_AUTH_COOKIE": None,
 }
+
+CELERY_IGNORE_RESULT = True
+CELERY_ACCEPT_CONTENT = ["pickle"]
+CELERY_TASK_SERIALIZER = "pickle"
+CELERY_RESULT_SERIALIZER = "pickle"
+CELERY_TASK_SERIALIZER = "pickle"
+CELERY_RESULT_BACKEND = "redis://"
+CELERY_IMPORTS = ("qna.tasks",)
+
+
+NOTIFICATION_EMAIL = "support@doubtnut.com"
+
+INACITIVITY_EMAIL_TIME = 5
