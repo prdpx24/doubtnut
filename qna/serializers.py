@@ -26,8 +26,6 @@ class QuestionDetailSerializer(serializers.ModelSerializer):
 
 
 class UserAskedQuestionBaseSerializer(serializers.ModelSerializer):
-    user_asked_question_id = serializers.IntegerField(source="id")
-
     class Meta:
         model = UserAskedQuestion
         fields = "__all__"
